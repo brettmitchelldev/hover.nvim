@@ -164,7 +164,7 @@ end
 --- @param provider Hover.Provider
 --- @param popts Hover.Options
 --- @return boolean
-local function run_provider(provider, popts)
+function M.run_provider(provider, popts)
   local config = get_config()
   local opts = vim.deepcopy(config.preview_opts)
 
@@ -180,10 +180,14 @@ local function run_provider(provider, popts)
 
   opts.relative = popts.relative
 
+  if type(provider.execute_a) ~= 'function' then
+    provider.execute_a = async.wrap(provider.execute, 1)
+  end
+
   local result = provider.execute_a(popts)
 
   if result then
-    async.scheduler()
+    -- async.scheduler()
     show_hover(popts.bufnr, provider.id, config, result, opts)
     return true
   end
@@ -228,7 +232,7 @@ M.hover = async.void(function(opts)
   for _, provider in ipairs(providers) do
     if not opts or not opts.providers or vim.tbl_contains(opts.providers, provider.name) then
       async.scheduler()
-      if use_provider and is_enabled(provider, bufnr) and run_provider(provider, opts) then
+      if use_provider and is_enabled(provider, bufnr) and M.run_provider(provider, opts) then
         return
       end
       if provider.id == current_provider then
@@ -240,7 +244,7 @@ M.hover = async.void(function(opts)
   for _, provider in ipairs(providers) do
     if not opts or not opts.providers or vim.tbl_contains(opts.providers, provider.name) then
       async.scheduler()
-      if is_enabled(provider, bufnr) and run_provider(provider, opts) then
+      if is_enabled(provider, bufnr) and M.run_provider(provider, opts) then
         return
       end
     end
@@ -260,7 +264,7 @@ function M.hover_select(opts)
     },
     function (provider)
       if provider then
-        async.void(run_provider)(provider, opts)
+        async.void(M.run_provider)(provider, opts)
       end
     end
   )
