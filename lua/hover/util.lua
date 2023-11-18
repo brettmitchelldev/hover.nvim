@@ -235,7 +235,7 @@ end
 --- @param bufnr integer?
 --- @param syntax string?
 --- @param opts table
---- @return integer
+--- @return integer, integer
 function M.open_floating_preview(contents, bufnr, syntax, opts)
   opts = opts or {}
   opts.wrap = opts.wrap ~= false -- wrapping by default
@@ -310,7 +310,7 @@ function M.open_floating_preview(contents, bufnr, syntax, opts)
   vim.w[hover_winid].hover_preview = hover_winid
   vim.b[cbuf].hover_preview = hover_winid
 
-  return hover_winid
+  return floating_bufnr, hover_winid
 end
 
 return M

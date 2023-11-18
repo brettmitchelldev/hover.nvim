@@ -25,7 +25,7 @@ end
 local function add_title(bufnr, winnr, active_provider_id)
   if not has_winbar then
     vim.notify_once('hover.nvim: `config.title` requires neovim >= 0.8.0',
-                    vim.log.levels.WARN)
+      vim.log.levels.WARN)
     return
   end
 
@@ -36,8 +36,8 @@ local function add_title(bufnr, winnr, active_provider_id)
   for _, p in ipairs(providers) do
     if is_enabled(p, bufnr) then
       local hl = p.id == active_provider_id and 'TabLineSel' or 'TabLineFill'
-      title[#title+1] = string.format('%%#%s# %s ', hl, p.name)
-      title[#title+1] = '%#Normal# '
+      title[#title + 1] = string.format('%%#%s# %s ', hl, p.name)
+      title[#title + 1] = '%#Normal# '
       winbar_length = winbar_length + #p.name + 2 -- + 2 for whitespace padding
     end
   end
@@ -121,7 +121,7 @@ local function send_to_preview_window()
   -- Unload the empty buffer created along with preview window
   local bufexist, buflinecnt = pcall(api.nvim_buf_line_count, pwin_prev_buf)
   if bufexist and buflinecnt == 1 and
-    api.nvim_buf_get_lines(pwin_prev_buf, 0, -1, false)[1] == "" then
+      api.nvim_buf_get_lines(pwin_prev_buf, 0, -1, false)[1] == "" then
     api.nvim_buf_delete(pwin_prev_buf, {})
   end
   vim.wo[pwin].winbar = vim.wo[hover_win].winbar
@@ -148,17 +148,17 @@ end
 --- @param config Hover.Config
 --- @param result Hover.Result
 --- @param opts Hover.Options
---- @return integer hover_winid
+--- @return integer hover_bufnr, integer hover_winid
 local function show_hover(bufnr, provider_id, config, result, opts)
   local util = require('hover.util')
-  local winid = util.open_floating_preview(result.lines, result.bufnr, result.filetype, opts)
+  local final_bufnr, winid = util.open_floating_preview(result.lines, result.bufnr, result.filetype, opts)
 
   if config.title then
     add_title(bufnr, winid, provider_id)
   end
   vim.w[winid].hover_provider = provider_id
 
-  return winid
+  return final_bufnr, winid
 end
 
 --- @param provider Hover.Provider
@@ -188,7 +188,10 @@ function M.run_provider(provider, popts)
 
   if result then
     -- async.scheduler()
-    show_hover(popts.bufnr, provider.id, config, result, opts)
+    local bufnr, winnr = show_hover(popts.bufnr, provider.id, config, result, opts)
+    if provider.on_render then
+      provider.on_render(bufnr, winnr)
+    end
     return true
   end
 
@@ -262,7 +265,7 @@ function M.hover_select(opts)
         return provider.name
       end
     },
-    function (provider)
+    function(provider)
       if provider then
         async.void(M.run_provider)(provider, opts)
       end
