@@ -73,7 +73,7 @@ local function create_params(bufnr, row, col)
   end
 end
 
-require('hover').register {
+local lsp = {
   name = 'LSP',
   priority = 1000,
   enabled = function(bufnr)
@@ -108,3 +108,7 @@ require('hover').register {
     )
   end
 }
+
+require('hover').register(lsp)
+
+return lsp

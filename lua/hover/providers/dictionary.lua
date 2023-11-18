@@ -52,9 +52,13 @@ local execute = async.void(function(_opts, done)
   done({lines=cache[word], filetype="markdown"})
 end)
 
-require('hover').register {
+local dictionary = {
   name = 'Dictionary',
   priority = 100,
   enabled = enabled,
   execute = execute,
 }
+
+require('hover').register(dictionary)
+
+return dictionary

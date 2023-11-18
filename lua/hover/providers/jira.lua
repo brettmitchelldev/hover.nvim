@@ -29,10 +29,13 @@ local function execute(opts, done)
     end)
 end
 
-require('hover').register {
+local jira = {
     name = 'Jira',
     priority = 175,
     enabled = enabled,
     execute = execute
 }
 
+require('hover').register(jira)
+
+return jira

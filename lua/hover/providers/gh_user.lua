@@ -86,9 +86,13 @@ local execute = async.void(function(opts, done)
   done(results and {lines=results, filetype="markdown"})
 end)
 
-require('hover').register {
+local gh_user = {
   name = 'Github User',
   priority = 200,
   enabled = enabled,
   execute = execute,
 }
+
+require('hover').register(gh_user)
+
+return gh_user

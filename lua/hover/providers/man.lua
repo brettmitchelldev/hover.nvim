@@ -40,9 +40,13 @@ local execute = async.void(function(opts, done)
   done{ bufnr = bufnr }
 end)
 
-require('hover').register {
+local man = {
   name = 'Man',
   priority = 150,
   enabled = enabled,
   execute = execute,
 }
+
+require('hover').register(man)
+
+return man
