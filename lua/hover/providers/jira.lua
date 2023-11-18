@@ -36,6 +36,4 @@ local jira = {
     execute = execute
 }
 
-require('hover').register(jira)
-
 return jira

@@ -59,6 +59,4 @@ local dictionary = {
   execute = execute,
 }
 
-require('hover').register(dictionary)
-
 return dictionary

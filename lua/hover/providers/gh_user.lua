@@ -93,6 +93,4 @@ local gh_user = {
   execute = execute,
 }
 
-require('hover').register(gh_user)
-
 return gh_user

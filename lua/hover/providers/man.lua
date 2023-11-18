@@ -47,6 +47,4 @@ local man = {
   execute = execute,
 }
 
-require('hover').register(man)
-
 return man

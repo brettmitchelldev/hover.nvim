@@ -109,6 +109,4 @@ local lsp = {
   end
 }
 
-require('hover').register(lsp)
-
 return lsp

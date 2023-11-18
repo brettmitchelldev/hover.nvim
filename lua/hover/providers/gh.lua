@@ -83,6 +83,4 @@ local gh = {
   execute = execute,
 }
 
-require('hover').register(gh)
-
 return gh
