@@ -55,7 +55,7 @@ end
 ---@return integer?
 local function find_window_by_var(name, value)
   for _, win in ipairs(api.nvim_list_wins()) do
-    if npcall(api.nvim_win_get_var, win, name) == value then
+    if npcall(api.nvim_win_get_var, win, name) ~= nil then
       return win
     end
   end
@@ -67,12 +67,12 @@ local function focus_or_close_floating_window()
   local winid = api.nvim_get_current_win()
 
   -- Go back to previous window if we are in a focusable one
-  if vim.w[winid].hover then
+  if vim.w[winid].hover_provider then
     vim.cmd.wincmd('p')
     return winid
   end
 
-  local win = find_window_by_var('hover', bufnr)
+  local win = find_window_by_var('hover_provider', bufnr)
   if win and api.nvim_win_is_valid(win) and vim.fn.pumvisible() == 0 then
     -- focus and return the existing buf, win
     api.nvim_set_current_win(win)
@@ -187,7 +187,7 @@ function M.run_provider(provider, popts)
   local result = provider.execute_a(popts)
 
   if result then
-    -- async.scheduler()
+    async.scheduler()
     local bufnr, winnr = show_hover(popts.bufnr, provider.id, config, result, opts)
     if provider.on_render then
       provider.on_render(bufnr, winnr)
@@ -225,8 +225,8 @@ M.hover = async.void(function(opts)
 
   local bufnr = opts and opts.bufnr or api.nvim_get_current_buf()
 
-  local hover_win = vim.b[bufnr].hover_preview
-  local current_provider = hover_win and vim.w[hover_win].hover_provider or nil
+  -- local hover_win = vim.b[bufnr].hover_preview
+  -- local current_provider = hover_win and vim.w[hover_win].hover_provider or nil
 
   --- If hover is open then set use_provider to false until we cycle to the
   --- next available provider.
@@ -240,15 +240,6 @@ M.hover = async.void(function(opts)
       end
       if provider.id == current_provider then
         use_provider = true
-      end
-    end
-  end
-
-  for _, provider in ipairs(providers) do
-    if not opts or not opts.providers or vim.tbl_contains(opts.providers, provider.name) then
-      async.scheduler()
-      if is_enabled(provider, bufnr) and M.run_provider(provider, opts) then
-        return
       end
     end
   end
