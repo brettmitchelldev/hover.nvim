@@ -170,7 +170,7 @@ function M.run_provider(provider, popts)
 
   if opts.focusable ~= false and opts.focus ~= false then
     if do_hover() then
-      return false
+      return true
     end
   end
 
@@ -235,9 +235,12 @@ M.hover = async.void(function(opts)
   for _, provider in ipairs(providers) do
     if not opts or not opts.providers or vim.tbl_contains(opts.providers, provider.name) then
       async.scheduler()
-      if use_provider and is_enabled(provider, bufnr) and M.run_provider(provider, opts) then
-        return
+      local enabled = is_enabled(provider, bufnr)
+      if use_provider and enabled then
+        local succeeded = M.run_provider(provider, opts)
+        if succeeded then return end
       end
+
       if provider.id == current_provider then
         use_provider = true
       end
