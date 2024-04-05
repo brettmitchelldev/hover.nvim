@@ -190,7 +190,7 @@ function M.run_provider(provider, popts)
     async.scheduler()
     local bufnr, winnr = show_hover(popts.bufnr, provider.id, config, result, opts)
     if provider.on_render then
-      provider.on_render(bufnr, winnr)
+      provider.on_render(bufnr, winnr, popts)
     end
     return true
   end
@@ -224,6 +224,21 @@ M.hover = async.void(function(opts)
   init()
 
   local bufnr = opts and opts.bufnr or api.nvim_get_current_buf()
+
+  if opts.name then
+    local use_provider = nil
+    for _, provider in ipairs(providers) do
+      if provider.name == opts.name then
+        if not is_enabled(provider, bufnr) then return end
+        use_provider = provider
+      end
+    end
+
+    if not use_provider then return end
+    async.scheduler()
+    M.run_provider(use_provider, opts)
+    return
+  end
 
   -- local hover_win = vim.b[bufnr].hover_preview
   -- local current_provider = hover_win and vim.w[hover_win].hover_provider or nil
